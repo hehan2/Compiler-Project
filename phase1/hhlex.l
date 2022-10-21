@@ -1,7 +1,7 @@
 %{
     #define EXIT_OK 0
     #define EXIT_FAIL 1
-
+    #include <string.h>
     // global variables
     int identifiers = 0;
     int lines = 0;
@@ -43,13 +43,20 @@ return {return (RETURN);}
 \] {return (RB);}
 \{ {return (LC);}
 \} {return (RC);}
-{digit}*\.{digit}* {return (FLOAT);}
-{digit}* {return (INT);}
+{digit}{digit}*\.{digit}{digit}* {return (FLOAT);}
+{digit}* | (0x|0X)([0-9]|(a|b|c|d|e|f))*{
+	if(strlen(yytext) != 1 && yytext[0] == '0' && (yytext[1] != 'x' || yytext[1] != 'X')){
+		printf("%s\n","Invalid Int");
+	}
+	else if(strlen(yytext) > 3 && yytext[0] == '0' && (yytext[1] == 'x' || yytext[1] == 'X') && yytext[2] == '0'){
+		printf("%s\n", "Invalid int");		
+	}return (INT);}
 {letter_}({letter_}|{digit})* {return (ID);} 
 \'{letter}\' {return (CHAR);}
 
-. { /* a final rule that matches when seeing any character but new line */ }
-<<EOF>> { printf("There are %d occurrences of valid identifiers\n", identifiers); yyterminate(); }
+. { printf("Error type A at Line %d: Unknown characters \’%s\’\ n",
+yylineno, yytext); }
+<<EOF>> {}
 
 %%
 int main(int argc, char **argv){
