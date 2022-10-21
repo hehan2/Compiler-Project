@@ -1,15 +1,14 @@
 %{
     #include "syntax.tab.h"
     #include "stdlib.h"
+    int count = 0;
 %}
 
-INT 
-FLOAT
-CHAR
-ID
+letter [a-zA-Z]
+letter_ {letter}|_
+digit [0-9]
 
 %%
-
 "int"|"float"|"char" { return TYPE; }
 "struct" { return STRUCT; }
 "if" { return IF; }
@@ -39,9 +38,12 @@ ID
 "]" { return RB; }
 "{" { return LC; }
 "}" { return RC; }
-
-
+{digit}*\.{digit}* {return (FLOAT);}
+{digit}* {return (INT);}
+{letter_}({letter_}|{digit})* {return (ID);} 
+\'{letter}\' {return (CHAR);}
+" " {}
+"\n"|"\t"|"\r" {}
+<<EOF>> { return END; }
+. { printf("unkown lemex: %s\n", yytext); }
 %%
-int main(int argc, char **argv){
-    
-}
